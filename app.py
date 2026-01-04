@@ -3,6 +3,12 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from model import generate_agents, LaborMarket, run_simulation
 
+# ---------------- SESSION STATE ----------------
+if "simulation_ran" not in st.session_state:
+    st.session_state.simulation_ran = False
+    st.session_state.timeline = None
+    st.session_state.agent_summary = None
+
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="Agent-Based Labor Market Simulation",
@@ -32,20 +38,30 @@ rounds = st.sidebar.slider("Simulation Rounds", 5, 24, 12)
 
 run_button = st.sidebar.button("▶ Run Simulation")
 
-# ---------------- RUN SIMULATION ----------------
+# ---------------- RUN SIMULATION (ONLY WHEN BUTTON IS CLICKED) ----------------
 if run_button:
     agents = generate_agents(num_agents)
     labor_market = LaborMarket(jobs_per_round, market_difficulty)
     timeline, agent_summary = run_simulation(agents, labor_market, rounds)
 
+    st.session_state.simulation_ran = True
+    st.session_state.timeline = timeline
+    st.session_state.agent_summary = agent_summary
+
+# ---------------- SHOW RESULTS IF SIMULATION EXISTS ----------------
+if st.session_state.simulation_ran:
+
+    timeline = st.session_state.timeline
+    agent_summary = st.session_state.agent_summary
+
     # ---------------- METRICS ----------------
     col1, col2, col3 = st.columns(3)
 
-    col1.metric("Total Agents", num_agents)
+    col1.metric("Total Agents", len(agent_summary))
     col2.metric("Employed", agent_summary["employed"].sum())
     col3.metric(
         "Employment Rate",
-        f"{agent_summary['employed'].mean()*100:.1f}%"
+        f"{agent_summary['employed'].mean() * 100:.1f}%"
     )
 
     st.divider()
@@ -71,7 +87,7 @@ if run_button:
         st.dataframe(agent_summary, use_container_width=True)
 
     # ======================================================
-    # 👤 PERSONAL EMPLOYMENT PREDICTION (NEW SECTION)
+    # 👤 PERSONAL EMPLOYMENT PREDICTION
     # ======================================================
 
     st.divider()
@@ -145,7 +161,7 @@ if run_button:
 
         col2.metric(
             "Estimated Employment Probability",
-            f"{estimated_probability*100:.1f}%"
+            f"{estimated_probability * 100:.1f}%"
         )
 
         if estimated_probability >= 0.6:
