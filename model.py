@@ -121,4 +121,14 @@ def run_simulation(agents, labor_market, max_rounds=12):
 
     return timeline, agent_summary
 
+def calculate_job_potential(education, skills, experience, digital_presence):
+    job_potential = (
+        0.3 * skills +
+        0.3 * (education / 3) +
+        0.2 * (experience / 5) +
+        0.2 * digital_presence
+    )
+    return min(1.0, job_potential)
+
+
 
