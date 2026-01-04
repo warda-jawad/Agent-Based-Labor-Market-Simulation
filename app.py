@@ -69,3 +69,94 @@ if run_button:
     # ---------------- DATA TABLE ----------------
     with st.expander("📋 Agent-Level Results"):
         st.dataframe(agent_summary, use_container_width=True)
+
+    # ======================================================
+    # 👤 PERSONAL EMPLOYMENT PREDICTION (NEW SECTION)
+    # ======================================================
+
+    st.divider()
+    st.header("👤 Personal Employment Prediction")
+
+    st.markdown(
+        """
+        Enter your personal characteristics below.
+        Your employment probability is estimated using the **same logic**
+        applied to agents in the simulation.
+        """
+    )
+
+    with st.form("user_prediction_form"):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            education = st.selectbox(
+                "Education Level",
+                options=[0, 1, 2, 3],
+                format_func=lambda x: {
+                    0: "No formal education",
+                    1: "High school",
+                    2: "Bachelor",
+                    3: "Master / PhD"
+                }[x]
+            )
+
+            experience = st.slider(
+                "Years of Work Experience",
+                0.0, 5.0, 1.5, step=0.5
+            )
+
+            skills = st.slider(
+                "Technical Skills Level",
+                0.0, 1.0, 0.6
+            )
+
+        with col2:
+            job_search_intensity = st.slider(
+                "Job Search Intensity",
+                0.0, 1.0, 0.7
+            )
+
+            digital_presence = st.slider(
+                "Digital Presence (LinkedIn, Portfolio, etc.)",
+                0.0, 1.0, 0.6
+            )
+
+        predict_btn = st.form_submit_button("🔮 Predict Employment Outcome")
+
+    if predict_btn:
+        user_job_potential = (
+            0.3 * skills +
+            0.3 * (education / 3) +
+            0.2 * (experience / 5) +
+            0.2 * digital_presence
+        )
+
+        user_job_potential = min(1.0, user_job_potential)
+        estimated_probability = user_job_potential * (1 - market_difficulty)
+
+        st.subheader("📊 Prediction Results")
+
+        col1, col2 = st.columns(2)
+
+        col1.metric(
+            "Job Potential Score",
+            f"{user_job_potential:.2f}"
+        )
+
+        col2.metric(
+            "Estimated Employment Probability",
+            f"{estimated_probability*100:.1f}%"
+        )
+
+        if estimated_probability >= 0.6:
+            st.success(
+                "✅ High probability of employment under current market conditions."
+            )
+        elif estimated_probability >= 0.4:
+            st.warning(
+                "⚠️ Moderate employment chances. Improving skills or visibility may help."
+            )
+        else:
+            st.error(
+                "❌ Low employment probability. Market conditions or personal factors are limiting."
+            )
