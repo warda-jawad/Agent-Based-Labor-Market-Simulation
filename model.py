@@ -106,4 +106,17 @@ def run_simulation(agents, labor_market, max_rounds=12):
         if employed_count == len(agents):
             break
 
-    return pd.DataFrame(results), agents
+    agent_summary = pd.DataFrame([
+    {
+        "agent_id": a.agent_id,
+        "employed": a.employed,
+        "round_hired": a.round_hired,
+        "job_potential": a.job_potential
+    }
+    for a in agents
+])
+
+timeline = pd.DataFrame(results)
+
+return timeline, agent_summary
+
